@@ -2,7 +2,22 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    colors: {
+      purple1: "#7945ff",
+      purple2: "#5c2dd5",
+      red: "#fd6687",
+      yellow: "#ffce67",
+      white: "#ffffff",
+      black: "#0000000",
+    },
+    fontFamily: {
+      main: ["Space Grotesk", "sans-serif"],
+    },
+    extend: {
+      content: {
+        plyrright: "url(./src/assets/plyrright.svg)",
+      },
+    },
   },
   plugins: [],
 };
