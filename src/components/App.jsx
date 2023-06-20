@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 
 import GameBoardHeader from "./GameBoardHeader";
@@ -65,7 +66,7 @@ function App() {
   );
 }
 
-function Disk({ data }) {
+function Disk({ data, isLast }) {
   const { type, pos } = data;
 
   function calcRowNumber(pos) {
@@ -73,12 +74,38 @@ function Disk({ data }) {
   }
 
   return (
-    <div
-      style={{ top: `${calcRowNumber(pos)}px` }}
-      className={`absolute left-2/4 -translate-x-2/4 ${
-        type === "p1" ? "bg-red" : "bg-yellow a"
-      } w-[64px] h-[64px] rounded-full mx-auto `}
-    ></div>
+    <>
+      <style>
+        {`
+          @keyframes drop${pos} {
+            0% {
+              top: 0px
+            }
+            80% {
+              top: ${calcRowNumber(pos)}px
+            }
+            90% {
+              top: ${calcRowNumber(pos) - 20}px
+            }
+            100% {
+              top: ${calcRowNumber(pos)}px
+            }
+          }
+        `}
+      </style>
+
+      <div
+        style={{
+          top: `${calcRowNumber(pos)}px`,
+          animation: `drop${pos} ${
+            isLast ? "500ms" : "0s"
+          } cubic-bezier(0.895, 0.030, 0.685, 0.220) forwards`,
+        }}
+        className={`absolute left-2/4 -translate-x-2/4 ${
+          type === "p1" ? "bg-red" : "bg-yellow a"
+        } w-[64px] h-[64px] rounded-full mx-auto`}
+      ></div>
+    </>
   );
 }
 
@@ -116,8 +143,11 @@ function BoardColumn({
 
   return (
     <div className="relative w-[70px] h-full" onClick={handleColumnClick}>
-      {discState[columnNo].map((el, i) => {
-        return <Disk key={i} data={el} />;
+      {discState[columnNo].map((el, i, arr) => {
+        if (i === arr.length - 1) {
+          return <Disk key={i} data={el} isLast={true} />;
+        }
+        return <Disk key={i} data={el} isLast={false} />;
       })}
     </div>
   );
