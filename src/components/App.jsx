@@ -6,6 +6,14 @@ import wb from "../assets/wb.svg";
 import bb from "../assets/bb.svg";
 import arrow from "../assets/arrow.svg";
 
+import {
+  makeMove,
+  union,
+  getLowestRowNumber,
+  checkForWin,
+} from "../utils/functions";
+import { winningPatternMasks } from "../data/winningPatternMasks";
+
 const initDiscState = {
   c0: [],
   c1: [],
@@ -22,6 +30,11 @@ function App() {
   const [downArrowState, setDownArrowState] = useState({
     pos: null,
     isVisible: false,
+  });
+  const [gameBoardState, setGameBoardState] = useState({
+    bb1: 0n,
+    bb2: 0n,
+    bbemp: (BigInt(1) << BigInt(42)) - BigInt(1),
   });
 
   return (
@@ -58,6 +71,8 @@ function App() {
                     playerTurn={playerTurn}
                     setPlayerTurn={setPlayerTurn}
                     setDownArrowPosX={setDownArrowState}
+                    gameBoardState={gameBoardState}
+                    setGameBoardState={setGameBoardState}
                   />
                 );
               })}
@@ -126,11 +141,55 @@ function BoardColumn({
   playerTurn,
   setPlayerTurn,
   setDownArrowPosX,
+  gameBoardState,
+  setGameBoardState,
 }) {
-  function handleColumnClick() {
+  const COL_NUMBER = 7n;
+  const ROW_NUMBER = 6n;
+
+  function handleColumnClick(e) {
     if (discState[columnNo].length >= 6) {
       return;
     }
+
+    // Game logic
+    const currEl = e.target;
+    const parentEl = e.target.parentNode;
+
+    const bcolumnNumber = BigInt(Array.from(parentEl.children).indexOf(currEl));
+
+    const combinedBoard = union(gameBoardState.bb1, gameBoardState.bb2);
+
+    const browNumber = getLowestRowNumber(
+      combinedBoard,
+      bcolumnNumber,
+      COL_NUMBER,
+      ROW_NUMBER
+    );
+
+    const pBoard =
+      playerTurn === "p1" ? gameBoardState.bb1 : gameBoardState.bb2;
+    const eBoard = gameBoardState.bbemp;
+
+    const [newPBoard, newEBoard] = makeMove(
+      pBoard,
+      eBoard,
+      browNumber,
+      bcolumnNumber,
+      COL_NUMBER
+    );
+
+    setGameBoardState((prev) => {
+      return {
+        ...prev,
+        [playerTurn === "p1" ? "bb1" : "bb2"]: newPBoard,
+        bbemp: newEBoard,
+      };
+    });
+
+    const isWinner = checkForWin(newPBoard, winningPatternMasks);
+
+    console.log(isWinner);
 
     setDiscState((prev) => {
       return {
@@ -143,7 +202,6 @@ function BoardColumn({
     });
 
     setPlayerTurn((prev) => {
-      console.log(prev);
       if (prev === "p1") {
         return "p2";
       } else {
