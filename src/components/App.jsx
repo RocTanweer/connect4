@@ -4,6 +4,7 @@ import { useState } from "react";
 import GameBoardHeader from "./GameBoardHeader";
 import wb from "../assets/wb.svg";
 import bb from "../assets/bb.svg";
+import arrow from "../assets/arrow.svg";
 
 const initDiscState = {
   c0: [],
@@ -18,6 +19,10 @@ const initDiscState = {
 function App() {
   const [discState, setDiscState] = useState(initDiscState);
   const [playerTurn, setPlayerTurn] = useState("p1");
+  const [downArrowState, setDownArrowState] = useState({
+    pos: null,
+    isVisible: false,
+  });
 
   return (
     <main className="flex justify-center items-center bg-purple1 w-full h-screen font-main">
@@ -35,10 +40,14 @@ function App() {
           <div className="relative w-[632px] h-[584px]">
             <img src={bb} className="absolute z-10" />
             <img src={wb} className="absolute z-30 pointer-events-none" />
-            <div
-              className="relative flex justify-between w-[598px] h-full mx-auto hover:cursor-pointer z-20"
-              onClick={console.log("hel")}
-            >
+            <img
+              src={arrow}
+              className={`absolute z-50 -top-10 ${
+                downArrowState.isVisible ? "block" : "hidden"
+              }`}
+              style={{ left: `${downArrowState.pos}px` }}
+            />
+            <div className="relative flex justify-between w-[598px] h-full mx-auto hover:cursor-pointer z-20">
               {Object.keys(discState).map((cno, i) => {
                 return (
                   <BoardColumn
@@ -48,6 +57,7 @@ function App() {
                     setDiscState={setDiscState}
                     playerTurn={playerTurn}
                     setPlayerTurn={setPlayerTurn}
+                    setDownArrowPosX={setDownArrowState}
                   />
                 );
               })}
@@ -115,6 +125,7 @@ function BoardColumn({
   setDiscState,
   playerTurn,
   setPlayerTurn,
+  setDownArrowPosX,
 }) {
   function handleColumnClick() {
     if (discState[columnNo].length >= 6) {
@@ -141,8 +152,28 @@ function BoardColumn({
     });
   }
 
+  function handleMouseEnter(e) {
+    const childRect = e.target.getBoundingClientRect();
+    const parentRect = e.target.parentNode.getBoundingClientRect();
+    const xDistance = childRect.left - parentRect.left;
+    setDownArrowPosX((prev) => {
+      return { ...prev, pos: 34 + xDistance, isVisible: true };
+    });
+  }
+
+  function handleMouseLeave() {
+    setDownArrowPosX((prev) => {
+      return { ...prev, pos: null, isVisible: false };
+    });
+  }
+
   return (
-    <div className="relative w-[70px] h-full" onClick={handleColumnClick}>
+    <div
+      className="relative w-[70px] h-full"
+      onClick={handleColumnClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {discState[columnNo].map((el, i, arr) => {
         if (i === arr.length - 1) {
           return <Disk key={i} data={el} isLast={true} />;
