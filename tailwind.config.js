@@ -8,7 +8,10 @@ export default {
       red: "#fd6687",
       yellow: "#ffce67",
       white: "#ffffff",
-      black: "#0000000",
+      black: {
+        100: "#0000000",
+        50: "#00000080",
+      },
     },
     fontFamily: {
       main: ["Space Grotesk", "sans-serif"],
