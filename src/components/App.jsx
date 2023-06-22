@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import GameBoardHeader from "./GameBoardHeader";
 import wb from "../assets/wb.svg";
@@ -11,8 +11,10 @@ import {
   union,
   getLowestRowNumber,
   checkForWin,
+  getCoordinates,
 } from "../utils/functions";
 import { winningPatternMasks } from "../data/winningPatternMasks";
+import { ROW_NUMBER, COL_NUMBER } from "../data/boardDimension";
 
 const initDiscState = {
   c0: [],
@@ -36,6 +38,33 @@ function App() {
     bb2: 0n,
     bbemp: (BigInt(1) << BigInt(42)) - BigInt(1),
   });
+  const [isThereWinner, setIsThereWinner] = useState(false);
+
+  const board = useRef(null);
+
+  useEffect(() => {
+    if (isThereWinner) {
+      console.log(`Winner is ${playerTurn === "p1" ? "yellow" : "red"}`);
+      const { bb1, bb2 } = gameBoardState;
+      const winnerbb = playerTurn === "p1" ? bb2 : bb1;
+      const coor = getCoordinates(winnerbb, ROW_NUMBER, COL_NUMBER);
+
+      const arrOfBoard = Array.from(board.current.children);
+
+      for (let i = 0; i < arrOfBoard.length; i++) {
+        const arrOfDisks = Array.from(
+          arrOfBoard[i].getElementsByTagName("div")
+        );
+        for (let j = 0; j < arrOfDisks.length; j++) {
+          if (coor.includes(`${i},${j}`)) {
+            setTimeout(() => {
+              arrOfDisks[j].classList.add("temp");
+            }, 600);
+          }
+        }
+      }
+    }
+  }, [isThereWinner, gameBoardState, playerTurn]);
 
   return (
     <main className="flex justify-center items-center bg-purple1 w-full h-screen font-main">
@@ -60,7 +89,10 @@ function App() {
               }`}
               style={{ left: `${downArrowState.pos}px` }}
             />
-            <div className="relative flex justify-between w-[598px] h-full mx-auto hover:cursor-pointer z-20">
+            <div
+              ref={board}
+              className="relative flex justify-between w-[598px] h-full mx-auto hover:cursor-pointer z-20"
+            >
               {Object.keys(discState).map((cno, i) => {
                 return (
                   <BoardColumn
@@ -73,6 +105,7 @@ function App() {
                     setDownArrowPosX={setDownArrowState}
                     gameBoardState={gameBoardState}
                     setGameBoardState={setGameBoardState}
+                    setIsThereWinner={setIsThereWinner}
                   />
                 );
               })}
@@ -126,9 +159,9 @@ function Disk({ data, isLast }) {
             isLast ? "500ms" : "0s"
           } cubic-bezier(0.895, 0.030, 0.685, 0.220) forwards`,
         }}
-        className={`absolute left-2/4 -translate-x-2/4 ${
+        className={`absolute left-2/4 -translate-x-2/4 shadow-inner shadow-black-50  ${
           type === "p1" ? "bg-red" : "bg-yellow a"
-        } w-[64px] h-[64px] rounded-full mx-auto`}
+        } w-[64px] h-[64px] rounded-full mx-auto before:content-[''] before:hidden before:top-2/4 before:-translate-y-2/4 before:left-2/4 before:-translate-x-2/4  before:w-7 before:h-7 before:border-[6px] before:rounded-full before:border-white`}
       ></div>
     </>
   );
@@ -143,10 +176,8 @@ function BoardColumn({
   setDownArrowPosX,
   gameBoardState,
   setGameBoardState,
+  setIsThereWinner,
 }) {
-  const COL_NUMBER = 7n;
-  const ROW_NUMBER = 6n;
-
   function handleColumnClick(e) {
     if (discState[columnNo].length >= 6) {
       return;
@@ -157,7 +188,6 @@ function BoardColumn({
     const parentEl = e.target.parentNode;
 
     const bcolumnNumber = BigInt(Array.from(parentEl.children).indexOf(currEl));
-
     const combinedBoard = union(gameBoardState.bb1, gameBoardState.bb2);
 
     const browNumber = getLowestRowNumber(
@@ -170,7 +200,6 @@ function BoardColumn({
     const pBoard =
       playerTurn === "p1" ? gameBoardState.bb1 : gameBoardState.bb2;
     const eBoard = gameBoardState.bbemp;
-
     const [newPBoard, newEBoard] = makeMove(
       pBoard,
       eBoard,
@@ -186,10 +215,10 @@ function BoardColumn({
         bbemp: newEBoard,
       };
     });
-
     const isWinner = checkForWin(newPBoard, winningPatternMasks);
-
-    console.log(isWinner);
+    if (isWinner) {
+      setIsThereWinner(isWinner);
+    }
 
     setDiscState((prev) => {
       return {
