@@ -37,18 +37,14 @@ export const makeMove = (
   COL_NUMBER
 ) => {
   const mask = 1n << (browNumber * COL_NUMBER + bcolumnNumber);
-
   pBoard |= mask;
-
   eBoard ^= mask;
-
   return [pBoard, eBoard];
 };
 
 export const checkForWin = (pBoard, winningMasks) => {
   for (let i = 0n; i < winningMasks.length; i++) {
     const result = pBoard & winningMasks[i];
-
     if (result === winningMasks[i]) {
       return true;
     }
@@ -64,6 +60,23 @@ export const checkForDraw = (eBoard) => {
     return false;
   }
 };
+
+export function getCoordinates(pBoard, ROW_NUMBER, COL_NUMBER) {
+  // looping for each each on the board
+  const diskCoordinates = [];
+  for (let i = 0n; i < ROW_NUMBER * COL_NUMBER; i++) {
+    // checking if the LSB is 1 or 0 by right shifting from 0-41 times
+    // If it is 1, then we will the it's coordinates
+
+    if ((pBoard >> i) & 1n) {
+      const row = BigInt(Math.floor(Number(i / COL_NUMBER)));
+      const column = i % COL_NUMBER;
+      diskCoordinates.push(`${column},${row}`);
+    }
+  }
+
+  return diskCoordinates;
+}
 
 // const createMask = (rowNumber, colNumber) => {
 //   const leftOffset = rowNumber * COL_NUMBER + colNumber;
