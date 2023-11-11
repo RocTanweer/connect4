@@ -29,10 +29,10 @@ const initDiscState = {
 function App() {
   const [discState, setDiscState] = useState(initDiscState);
   const [playerTurn, setPlayerTurn] = useState("p1");
-  const [downArrowState, setDownArrowState] = useState({
-    pos: null,
-    isVisible: false,
-  });
+  // const [downArrowState, setDownArrowState] = useState({
+  //   pos: null,
+  //   isVisible: false,
+  // });
   const [gameBoardState, setGameBoardState] = useState({
     bb1: 0n,
     bb2: 0n,
@@ -45,24 +45,23 @@ function App() {
   useEffect(() => {
     if (isThereWinner) {
       console.log(`Winner is ${playerTurn === "p1" ? "yellow" : "red"}`);
-      const { bb1, bb2 } = gameBoardState;
-      const winnerbb = playerTurn === "p1" ? bb2 : bb1;
-      const coor = getCoordinates(winnerbb, ROW_NUMBER, COL_NUMBER);
+      // const { bb1, bb2 } = gameBoardState;
+      // const winnerbb = playerTurn === "p1" ? bb2 : bb1;
+      // const coor = getCoordinates(winnerbb, ROW_NUMBER, COL_NUMBER);
+      // const arrOfBoard = Array.from(board.current.children);
 
-      const arrOfBoard = Array.from(board.current.children);
-
-      for (let i = 0; i < arrOfBoard.length; i++) {
-        const arrOfDisks = Array.from(
-          arrOfBoard[i].getElementsByTagName("div")
-        );
-        for (let j = 0; j < arrOfDisks.length; j++) {
-          if (coor.includes(`${i},${j}`)) {
-            setTimeout(() => {
-              arrOfDisks[j].classList.add("temp");
-            }, 600);
-          }
-        }
-      }
+      // for (let i = 0; i < arrOfBoard.length; i++) {
+      //   const arrOfDisks = Array.from(
+      //     arrOfBoard[i].getElementsByTagName("div")
+      //   );
+      //   for (let j = 0; j < arrOfDisks.length; j++) {
+      //     if (coor.includes(`${i},${j}`)) {
+      //       setTimeout(() => {
+      //         arrOfDisks[j].classList.add("temp");
+      //       }, 600);
+      //     }
+      //   }
+      // }
     }
   }, [isThereWinner, gameBoardState, playerTurn]);
 
@@ -82,13 +81,13 @@ function App() {
           <div className="relative w-[632px] h-[584px]">
             <img src={bb} className="absolute z-10" />
             <img src={wb} className="absolute z-30 pointer-events-none" />
-            <img
+            {/* <img
               src={arrow}
               className={`absolute z-50 -top-10 ${
                 downArrowState.isVisible ? "block" : "hidden"
               }`}
               style={{ left: `${downArrowState.pos}px` }}
-            />
+            /> */}
             <div
               ref={board}
               className="relative flex justify-between w-[598px] h-full mx-auto hover:cursor-pointer z-20"
@@ -102,7 +101,7 @@ function App() {
                     setDiscState={setDiscState}
                     playerTurn={playerTurn}
                     setPlayerTurn={setPlayerTurn}
-                    setDownArrowPosX={setDownArrowState}
+                    // setDownArrowPosX={setDownArrowState}
                     gameBoardState={gameBoardState}
                     setGameBoardState={setGameBoardState}
                     setIsThereWinner={setIsThereWinner}
@@ -173,7 +172,7 @@ function BoardColumn({
   setDiscState,
   playerTurn,
   setPlayerTurn,
-  setDownArrowPosX,
+  // setDownArrowPosX,
   gameBoardState,
   setGameBoardState,
   setIsThereWinner,
@@ -221,13 +220,15 @@ function BoardColumn({
     }
 
     setDiscState((prev) => {
-      return {
+      const tempObj = {
         ...prev,
         [columnNo]: [
           ...prev[columnNo],
           { type: playerTurn, pos: prev[columnNo].length },
         ],
       };
+
+      return tempObj;
     });
 
     setPlayerTurn((prev) => {
@@ -239,27 +240,27 @@ function BoardColumn({
     });
   }
 
-  function handleMouseEnter(e) {
-    const childRect = e.target.getBoundingClientRect();
-    const parentRect = e.target.parentNode.getBoundingClientRect();
-    const xDistance = childRect.left - parentRect.left;
-    setDownArrowPosX((prev) => {
-      return { ...prev, pos: 34 + xDistance, isVisible: true };
-    });
-  }
+  // function handleMouseEnter(e) {
+  //   const childRect = e.target.getBoundingClientRect();
+  //   const parentRect = e.target.parentNode.getBoundingClientRect();
+  //   const xDistance = childRect.left - parentRect.left;
+  //   setDownArrowPosX((prev) => {
+  //     return { ...prev, pos: 34 + xDistance, isVisible: true };
+  //   });
+  // }
 
-  function handleMouseLeave() {
-    setDownArrowPosX((prev) => {
-      return { ...prev, pos: null, isVisible: false };
-    });
-  }
+  // function handleMouseLeave() {
+  //   setDownArrowPosX((prev) => {
+  //     return { ...prev, pos: null, isVisible: false };
+  //   });
+  // }
 
   return (
     <div
       className="relative w-[70px] h-full"
       onClick={handleColumnClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      // onMouseEnter={handleMouseEnter}
+      // onMouseLeave={handleMouseLeave}
     >
       {discState[columnNo].map((el, i, arr) => {
         if (i === arr.length - 1) {
